@@ -9,11 +9,16 @@ Rails.application.routes.draw do
   delete 'signout' => 'sessions#destroy'
   get 'categories' => 'categories#index'
   
-  resources :users, only: :create
   namespace :admin do
     resources :users
+  end  
+
+  resources :users, only: [:create, :show] do
+    resource :following, only: :show
+    resource :followers, only: :show
   end
-  
+  resources :relationships, only: [:create, :destroy]
+ 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

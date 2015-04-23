@@ -7,7 +7,7 @@ class Admin::UsersController < ApplicationController
     @users = User.paginate page: params[:page], per_page: 15
   end
 
-  def show 
+  def edit
     @user = User.find params[:id]
   end
 
@@ -15,7 +15,7 @@ class Admin::UsersController < ApplicationController
     @user = User.find params[:id]
     if @user.update_attributes user_params
       flash[:success] = "Profile updated"
-      redirect_to [:admin, @user]
+      redirect_to @user
     else
       render :edit
     end

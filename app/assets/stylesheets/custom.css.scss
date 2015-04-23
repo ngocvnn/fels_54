@@ -362,3 +362,58 @@ input {
   margin-bottom: 20px;
 }
 
+/* following user */
+
+.stats {
+  overflow: auto;
+  margin-top: 0;
+  padding: 0;
+  a {
+    float: left;
+    padding: 0 10px;
+    border-left: 1px solid $gray-lighter;
+    color: gray;
+    &:first-child {
+      padding-left: 0;
+      border: 0;
+    }
+    #following{
+      text-align: center;
+    }
+    #followers{
+      text-align: center;
+    }
+    &:hover {
+      text-decoration: none;
+      color: blue;
+    }
+  } 
+  strong {
+    display: block;
+  }
+}
+
+.user_avatars {
+  overflow: auto;
+  margin-top: 10px;
+  .gravatar {
+    margin: 1px 1px;
+    height: 55px;
+    width: 50px;
+  }
+  a {
+    padding: 0;
+  }
+}
+
+.users.follow {
+  padding: 0;
+}
+
+#follow_form {
+  .btn{
+    width: 125px;
+    border: 2px solid black;
+  }
+}
+
