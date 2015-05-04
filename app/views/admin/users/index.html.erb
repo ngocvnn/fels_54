@@ -1,6 +1,8 @@
 <% provide:title, 'All users' %>
 <h1>All users</h1>
 <div class="row">
+  <%= link_to 'Add New User', new_admin_user_path, class: "btn btn-primary",
+    id: "add-new-user" %>
   <ul class="users">
     <%= render @users %>
   </ul>

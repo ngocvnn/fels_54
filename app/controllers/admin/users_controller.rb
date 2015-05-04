@@ -1,10 +1,23 @@
 class Admin::UsersController < ApplicationController  
-  before_action :logged_in_user, except: [:show, :new, :create]
-  before_action :correct_user, only: [:edit, :update]
-  before_action :admin_user, only: :destroy
-
+  before_action :authenticate_user!
+  load_and_authorize_resource
+  
   def index
     @users = User.paginate page: params[:page], per_page: 15
+  end
+
+  def new
+    @user = User.new
+  end
+
+  def create
+    @user = User.new user_params
+    if @user.save
+      flash[:success] = "User was successfully created !"
+      redirect_to @user
+    else
+      render :new
+    end
   end
 
   def edit
@@ -12,8 +25,16 @@ class Admin::UsersController < ApplicationController
   end
 
   def update
-    @user = User.find params[:id]
-    if @user.update_attributes user_params
+    if user_params[:password].blank?
+      user_params.delete(:password)
+      user_params.delete(:password_confirmation)
+    end
+    successfully_updated = if needs_password?(@user, user_params)
+                             @user.update(user_params)
+                           else
+                             @user.update_without_password(user_params)
+                           end
+    if successfully_updated
       flash[:success] = "Profile updated"
       redirect_to @user
     else
@@ -28,12 +49,12 @@ class Admin::UsersController < ApplicationController
   end
 
   private
-  def user_params
-    params.require(:user).permit(:name, :email, :password,
-      :password_confirmation)
+  def needs_password?(user, params)
+    params[:password].present?
   end
-      
-  def admin_user
-    redirect_to root_url unless current_user.admin?
+
+  def user_params
+    params.require(:user).permit :name, :email, :password,
+      :password_confirmation
   end
 end
