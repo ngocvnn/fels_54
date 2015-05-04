@@ -1,5 +1,10 @@
 class User < ActiveRecord::Base
-  attr_accessor :remember_token
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
+  belongs_to :role
+
   has_many :active_relationships, class_name: "Relationship",
     foreign_key: "follower_id", dependent: :destroy
   has_many :passive_relationships, class_name: "Relationship",
@@ -9,42 +14,19 @@ class User < ActiveRecord::Base
   has_many :learned_words, dependent: :destroy
 
   validates :name, presence:true, length: {maximum: 50}
-  validates :email, presence: true, length: {maximum: 255}
-  validates :email, format: {with: /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i}
-  validates :email, uniqueness: {case_sensitive: false}
-  validates :password, length: {minimum:6}, allow_blank: true
+  
+  before_save :assign_role
 
-  before_save :downcase_email
-
-  has_secure_password
-
-  def User.digest string
-    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
-                                                  BCrypt::Engine.cost
-    BCrypt::Password.create(string, cost: cost)
+  def assign_role
+    self.role = Role.find_by name: "Regular" if self.role.nil?
   end
 
-  def User.new_token
-    SecureRandom.urlsafe_base64
+  def admin?
+    self.role.name == "Admin"
   end
 
-  def remember
-    self.remember_token = User.new_token
-    update_attributes! remember_digest: User.digest(remember_token)
-  end
-
-  def authenticated? remember_token
-    BCrypt::Password.new remember_digest.is_password?(remember_token)
-  end
-
-  def forget
-    update_attributes! remember_digest: nil
-  end
-
-  def authenticated? attribute,token
-    digest = send("#{attribute}_digest")
-    return false if digest.nil?
-    BCrypt::Password.new digest.is_password? token
+  def regular?
+    self.role.name == "Regular"
   end
 
   def follow other_user
@@ -57,12 +39,5 @@ class User < ActiveRecord::Base
 
   def following? other_user
     following.include?(other_user)
-  end
-
-  private
-  def downcase_email
-    self.email = email.downcase
-  end
-  
+  end  
 end
-
